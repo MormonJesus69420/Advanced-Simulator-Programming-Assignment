@@ -7,13 +7,14 @@
 using namespace simaspect;
 
 // gmlib2
-#include <gmlib2/qt/exampleobjects/parametriccurves.h>
 #include <gmlib2/qt/exampleobjects/tensorproductsurfaces.h>
+#include <gmlib2/qt/exampleobjects/parametriccurves.h>
 using namespace gmlib2::qt;
 
 // qt
-#include <QQmlContext>
 #include <Qt3DQuick/QQmlAspectEngine>
+#include <QQmlContext>
+#include <Qt3DExtras>
 
 // stl
 #include <exception>
@@ -37,56 +38,79 @@ void GuiApplication::initializeScene()
     return;
 
   auto sphere1 = m_scene->createObject<TPSphere>();
-  sphere1->translate(Vector_Type{ 3.9f, 0.0f, 7.0f });
+  sphere1->translate(Vector_Type{ 4, 0, 9 });
 
-  auto plane1 = m_scene->createObject<TPPlane>(
-      Point3{ -5, -5, 0 },
-      Vector3{ 10, 0, 0 },
-      Vector3{ 0, 10, 0 });
+  auto sphere2 = m_scene->createObject<TPSphere>();
+  sphere2->translate(Vector_Type{ -4, 0, 9 });
 
-  auto plane2 = m_scene->createObject<TPPlane>(
-      Point3{ -5, -5, 0 },
-      Vector3{ 0, 10, 0 },
-      Vector3{ 10, 0, 0 });
-  plane2->translate(Vector_Type{ 0, 0, 12 });
+  auto sphere3 = m_scene->createObject<TPSphere>();
+  sphere3->translate(Vector_Type{ 0, 0, 2 });
 
-  auto plane3 = m_scene->createObject<TPPlane>(
-      Point3{ 0, 0, 0 },
-      Vector3{ 0, 10, 0 },
-      Vector3{ 0, 0, 10 });
+  auto plane1 = m_scene->createObject<TPPlane>(Point3{ -5, -5, 0 }, Vector3{ 10, 0.0, 0.0 }, Vector3{ 0, 10, 0 });
+  plane1->translate(Vector_Type{ 0, 0, 0 });
+
+  auto plane2 = m_scene->createObject<TPPlane>(Point3{ -5, -5, 0 }, Vector3{ 0, 10, 0 }, Vector3{ 10, 0, 0 });
+  plane2->translate(Vector_Type{ 0, 0, 10 });
+
+  auto plane3 = m_scene->createObject<TPPlane>(Point3{ 0, 0, 0 }, Vector3{ 0, 10, 0 }, Vector3{ 0, 0, 10 });
   plane3->translate(Vector_Type{ -5, -5, 0 });
 
-  auto plane4 = m_scene->createObject<TPPlane>(
-      Point3{ 0, 0, 0 },
-      Vector3{ 0, 0, 10 },
-      Vector3{ 0, 10, 0 });
+  auto plane4 = m_scene->createObject<TPPlane>(Point3{ 0, 0, 0 }, Vector3{ 0, 0, 10 }, Vector3{ 0, 10, 0 });
   plane4->translate(Vector_Type{ 5, -5, 0 });
 
-  auto* object_controller_1 = new ObjectController();
-  object_controller_1->setVelocity(QVector3D(-6, 0, -5));
-  object_controller_1->setType(ObjectType::dynamic_obj);
-  object_controller_1->setKind(ObjectKind::sphere);
-  sphere1->addComponent(object_controller_1);
+  auto plane5 = m_scene->createObject<TPPlane>(Point3{ 0, 0, 0 }, Vector3{ 10, 0, 0 }, Vector3{ 0, 0, 10 });
+  plane5->translate(Vector_Type{ -5, 5, 0 });
 
-  auto* object_controller_2 = new ObjectController();
-  object_controller_2->setType(ObjectType::static_obj);
-  object_controller_2->setKind(ObjectKind::plane);
-  plane1->addComponent(object_controller_2);
+  auto plane6 = m_scene->createObject<TPPlane>(Point3{ 0, 0, 0 }, Vector3{ 0, 0, 10 }, Vector3{ 10, 0, 0 });
+  plane6->translate(Vector_Type{ -5, -5, 0 });
 
-  auto* object_controller_3 = new ObjectController();
-  object_controller_3->setType(ObjectType::static_obj);
-  object_controller_3->setKind(ObjectKind::plane);
-  plane2->addComponent(object_controller_3);
+  auto* controller_sphere_1 = new ObjectController();
+  controller_sphere_1->setVelocity(QVector3D(-6, 0, -5));
+  controller_sphere_1->setType(ObjectType::dynamic_obj);
+  controller_sphere_1->setKind(ObjectKind::sphere);
+  sphere1->addComponent(controller_sphere_1);
 
-  auto* object_controller_4 = new ObjectController();
-  object_controller_4->setType(ObjectType::static_obj);
-  object_controller_4->setKind(ObjectKind::plane);
-  plane3->addComponent(object_controller_4);
+  auto* controller_sphere_2 = new ObjectController();
+  controller_sphere_2->setVelocity(QVector3D(6, 0, -5));
+  controller_sphere_2->setType(ObjectType::dynamic_obj);
+  controller_sphere_2->setKind(ObjectKind::sphere);
+  sphere2->addComponent(controller_sphere_2);
 
-  auto* object_controller_5 = new ObjectController();
-  object_controller_5->setType(ObjectType::static_obj);
-  object_controller_5->setKind(ObjectKind::plane);
-  plane4->addComponent(object_controller_5);
+  auto* controller_sphere_3 = new ObjectController();
+  controller_sphere_3->setVelocity(QVector3D(0, 0, 2));
+  controller_sphere_3->setType(ObjectType::dynamic_obj);
+  controller_sphere_3->setKind(ObjectKind::sphere);
+  sphere3->addComponent(controller_sphere_3);
+
+  auto* controller_plane_1 = new ObjectController();
+  controller_plane_1->setType(ObjectType::static_obj);
+  controller_plane_1->setKind(ObjectKind::plane);
+  plane1->addComponent(controller_plane_1);
+
+  auto* controller_plane_2 = new ObjectController();
+  controller_plane_2->setType(ObjectType::static_obj);
+  controller_plane_2->setKind(ObjectKind::plane);
+  plane2->addComponent(controller_plane_2);
+
+  auto* controller_plane_3 = new ObjectController();
+  controller_plane_3->setType(ObjectType::static_obj);
+  controller_plane_3->setKind(ObjectKind::plane);
+  plane3->addComponent(controller_plane_3);
+
+  auto* controller_plane_4 = new ObjectController();
+  controller_plane_4->setType(ObjectType::static_obj);
+  controller_plane_4->setKind(ObjectKind::plane);
+  plane4->addComponent(controller_plane_4);
+
+  auto* controller_plane_5 = new ObjectController();
+  controller_plane_5->setType(ObjectType::static_obj);
+  controller_plane_5->setKind(ObjectKind::plane);
+  plane5->addComponent(controller_plane_5);
+
+  auto* controller_plane_6 = new ObjectController();
+  controller_plane_6->setType(ObjectType::static_obj);
+  controller_plane_6->setKind(ObjectKind::plane);
+  plane6->addComponent(controller_plane_6);
 }
 
 void GuiApplication::onSceneCreated(QObject* root_object)

@@ -31,10 +31,10 @@ void ObjectControllerBackend::updatePositions(AffineSpaceD3 position)
   QMatrix4x4 new_pos;
 
   for (int i = 0; i < 4; ++i) {
-    new_pos(i, 0) = float(dir[i]);
-    new_pos(i, 1) = float(side[i]);
-    new_pos(i, 2) = float(up[i]);
-    new_pos(i, 3) = float(pos[i]);
+    new_pos(int(i), 0) = float(dir[i]);
+    new_pos(int(i), 1) = float(side[i]);
+    new_pos(int(i), 2) = float(up[i]);
+    new_pos(int(i), 3) = float(pos[i]);
   }
 
   auto e = Qt3DCore::QPropertyUpdatedChangePtr::create(peerId());

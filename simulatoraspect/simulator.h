@@ -1,6 +1,7 @@
 #ifndef SIMULATOR_H
 #define SIMULATOR_H
 
+#include "collision_algorithms.h"
 #include "simulatoraspecttypes.h"
 #include "simulatoraspect.h"
 #include "structs.h"
@@ -8,6 +9,8 @@
 #include <Qt3DCore>
 
 namespace simaspect {
+
+using CollisionObject = algorithms::CollisionObject;
 
 class Simulator {
   public:
@@ -29,10 +32,19 @@ class Simulator {
   private:
   SimulatorAspect* aspect;
 
+  std::vector<CollisionObject> collisions;
+
   std::map<NodeId, SphereBackendData> dynamic_spheres;
   std::map<NodeId, SphereBackendData> static_spheres;
   std::map<NodeId, PlaneBackendData> dynamic_planes;
   std::map<NodeId, PlaneBackendData> static_planes;
+
+  void simulateUpToCollision(SphereBackendData& sphere, const CollisionObject& collision, const seconds_type dt);
+  void newCollisionCheck(SphereBackendData& sphere, CollisionObject& collision, const seconds_type dt);
+  void impactResponse(SphereBackendData& sphere1, SphereBackendData& sphere2, const seconds_type dt);
+  void impactResponse(SphereBackendData& sphere, PlaneBackendData& plane, const seconds_type dt);
+  void collisionCheck(seconds_type dt);
+  void sortAndMakeUnique();
 };
 
 } // namespace simaspect

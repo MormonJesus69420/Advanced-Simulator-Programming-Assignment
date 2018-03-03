@@ -56,12 +56,14 @@ Qt3DCore::QNodeCreatedChangeBasePtr ObjectController::createNodeCreationChange()
     data.dir = QVector3D(dir[0], dir[1], dir[2]);
     data.up = QVector3D(up[0], up[1], up[2]);
     data.type = type;
+    // 0UL, unsinged shlong
     Vector3 normal = blaze::normalize(blaze::cross(blaze::subvector(p->m_u, 0UL, 3UL), blaze::subvector(p->m_v, 0UL, 3UL)));
     data.normal = QVector3D(normal[0], normal[1], normal[2]);
     connect(this, &ObjectController::positionUpdated, p, &SceneObject::globalFrameChanged);
 
     return creationChange;
   }
+
   Qt3DCore::QNodeCreatedChangePtr<PhysObject> creationChange = Qt3DCore::QNodeCreatedChangePtr<PhysObject>::create(this);
   auto& data = creationChange->data;
   data = PhysObject();
@@ -98,4 +100,5 @@ void ObjectController::setKind(ObjectKind kind)
 {
   this->kind = kind;
 }
+
 } // namespace simaspect

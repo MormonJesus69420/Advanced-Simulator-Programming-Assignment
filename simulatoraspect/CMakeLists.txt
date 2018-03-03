@@ -13,6 +13,7 @@ set(HDRS
 
 set( SRCS
   objectcontrollerbackend.cpp
+  collision_algorithms.cpp
   objectcontroller.cpp
   simulatoraspect.cpp
   simulatorjob.cpp
