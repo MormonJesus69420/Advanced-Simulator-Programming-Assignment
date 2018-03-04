@@ -1,0 +1,251 @@
+% Article type supporting font formatting
+%\documentclass[10pt]{extarticle}
+\documentclass[a4,10pt]{article}
+
+% Define .tex file encoding
+\usepackage[utf8]{inputenc}
+
+% Norwegian language support
+%\usepackage[norsk]{babel}     
+
+% Indent first paragraph in section
+\usepackage{indentfirst}
+
+% Allows mathbb in tex file
+\usepackage{amsfonts}    
+     
+% Margin defining package
+%\usepackage{geometry}         
+%\geometry{a4paper
+  %,margin=.75in
+%}
+
+% For use of graphics in document
+\usepackage{graphicx}         
+
+% Allows multi-line comments in tex file
+\usepackage{verbatim}         
+
+% Allows math in tex file 
+\usepackage{amsmath}          
+
+% Allows math symbols in tex file
+\usepackage{amssymb}          
+
+% Allows use of physics shortcut functions
+\usepackage{physics}          
+
+% Verbatim env with LaTeX commands
+\usepackage{alltt}            
+
+% Allows \begin{figure}[H]
+\usepackage{float}            
+
+% Necessary for defining colours
+\usepackage{color}            
+\definecolor{linkgreen}{rgb}{0,.5,0}
+\definecolor{linkblue}{rgb}{0,0,.5}
+\definecolor{linkred}{rgb}{.5,0,0}
+\definecolor{blue}{rgb}{.13,.13,1}
+\definecolor{green}{rgb}{0,.5,0}
+\definecolor{red}{rgb}{.9,0,0}
+
+% Hyperlinks in document
+\usepackage{hyperref}  
+\hypersetup{
+  colorlinks=true,     % True for colored links
+  linktoc=all,         % True for table of contents links
+  linkcolor=linkblue,  % Colour for links
+  urlcolor=linkgreen,  % Colour for URLs
+  citecolor=linkred    % Colour for citations
+}
+
+% Listing package for code examples
+\usepackage{listings}         
+\lstset{
+  language=C++,                % Set language to C++
+  showspaces=false,            % Don't show space chars
+  showtabs=false,              % Don't show tab chars
+  breaklines=true,             % Break long lines of code
+  showstringspaces=false,      % Don't show spaces in strings
+  breakatwhitespace=true,      % Break at white space only
+  commentstyle=\color{green},  % Set colour for comments
+  keywordstyle=\color{blue},   % Set colours for keywords
+  stringstyle=\color{red},     % Set colour for strings
+  basicstyle=\ttfamily,        % Set basic style
+  tabsize=2                    % Set tabsize
+}
+
+% Referencing, last for compatibility reasons
+\usepackage[noabbrev]{cleveref}
+
+% Command to set two lines under text
+\newcommand{\uunderline}[1]{\underline{\underline{#1}}}
+
+% Command to use integral with limits
+\newcommand{\Int}{\int\limits}    
+
+% Command to use double integral with limits
+\newcommand{\IInt}{\iint\limits}  
+
+% Command to use triple integral with limits
+\newcommand{\IIInt}{\iiint\limits}
+
+% Command removes section numbering
+\newcommand{\mysection}[2]{   
+\setcounter{section}{#1}
+\section*{#2}
+\addcontentsline{toc}{section}{#2}
+}
+
+% Command removes subsection numbering
+\newcommand{\mysubsection}[2]{  
+\setcounter{subsection}{#1}
+\subsection*{#2}
+\addcontentsline{toc}{subsection}{#2}
+}
+
+% Command removes subsubsection numbering
+\newcommand{\mysubsubsection}[2]{ 
+\setcounter{subsubsection}{#1}
+\subsubsection*{#2}
+\addcontentsline{toc}{subsubsection}{#2}
+}
+
+% Makes matrices look square-ish
+\renewcommand*{\arraystretch}{1.5}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%      Title, Author, and Date      %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Advanced Game And Simulator Programming Report}
+\author{Daniel Aaron Salwerowicz}
+\date{\today}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%           Start document          %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%   Create the main title section   %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%      Abstract for the report      %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{abstract}
+ Purpose of this report is to present my work on developing a C++
+ based physics simulator, that utilizes GMlib2 and GMlib2Qt.
+\end{abstract}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%         ToC for the report        %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\tableofcontents
+%\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  The main content of the report  %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+In this project I have utilized an in-house geometric modeling library developed by Simulations R\&D group at UiT called GMlib2. In addition to that I have used Qt, and C++. Resulting simulator is able to quite accurately depict collisions between spheres and planes, spheres and spheres, one at a time or several concurrent collisions. However there are some flaws with my system that I will highlight in the Analysis and Discussion part of this report.
+
+This report will mostly present how I have implemented system for object collision and visualization using Qt3D engine's aspects. Theory is based on a paper written by my lecturers \cite{bratlie_dalmo_laksaa_brustad_2017} as well as guides provided by Qt3D development team \cite{harmer1_2017} \cite{harmer2_2017}.
+
+\section{Methods}
+I've utilized Qt3D aspect to handle most of the work in simulating my physics engine. I will therefore go into detail describing how my project was constructed. \verb|Scene| creates \verb|GUIApplication| object that contains several \verb|QNode| elements such as \verb|TPSphere| and \verb|TPPlane|. These object are then controlled by \verb|ObjectController| communicating back and forth with back-end equivalent \verb|ObjectControllerBackend|. Class \verb|SimulatorAspect| schedules jobs, that then call methods in \verb|Simulator|, results are propagated to the rest of the system using \verb|ObjectControllerBackend|. \Cref{DataFlow} visualizes this data flow.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{DataFlow}
+  \caption{Data flow diagram representing communication between objects in my project} \label{DataFlow}
+\end{figure}
+
+\subsection{Predefined classes}
+\verb|TPSphere| and \verb|TPPlane| are used to represent needed data for spheres and planes in Qt3D used in GUI part of my application. They function as parents for their \verb|ObjectController's| and their data is then converted into structs that are used on the backend. \verb|GUIApplication| sets up those objects and registers them in \verb|Scene|. These classes, besides \verb|ObjectController|, were given to us in GMlib2, GMlib2QT and STET6245TemplateApp projects. They also form so called front-end of my program.
+
+\subsection{My classes}
+\subsubsection{ObjectController}
+It is used to hold basic data about the object it's meant to control. Those are: it's physical properties stored in \verb|PhysObject| struct as well as information about its velocity, type and kind. \verb|createNodeCreationChange| method sets up this struct, where front-end object is converted to struct which will be used in communication with back-end. 
+
+\subsubsection{ObjectControllerBackend}
+This class takes pointer to \verb|SimulatorAspect| which it uses to register simulation objects. Registration happens in \verb|initFromPeer| method that takes reference to \verb|QNodeCreatedChangeBasePtr| created in \verb|ObjectController| and uses data in it to register object used in back-end for simulation. It also has a small class \verb|ObjectControllerBackendMapper| that is used to map front-end and back-end elements together.
+
+\subsubsection{SimulatorAspect}
+Besides registering simulation objects and \verb|ObjectControllerBackends| this class does several other things. They are: scheduling of jobs for execution and calling \verb|simulate| method in \verb|Simulator|. \verb|SimulatorJob| a small helper class is used to store timestep value and call \verb|checkCollisions| method in all registered \verb|ObjectControllers|.
+
+\subsubsection{Simulator}
+This is the most important class in this project. \verb|simulate| method thats it contains gives life to the simulation. It starts with initialization which include setting several variables to standard values for each timestep. 
+
+\verb|collisionCheck| method detects collisions for each dynamic object with other dynamic objects as well as static object. Those checks are done in helper class \verb|collision_algorithms|, checks are based on calculations presented in detail in \cite{bratlie_dalmo_laksaa_brustad_2017}. Collisions are sorted by time and made unique, so that if for example two balls collide, only one collision found by algorithms is simulated.
+
+Colliding objects are simulated up to collision in appropriately called method, impact response is calculated and new collision checks are done. This is done for each collsion in a given timestep.
+
+Lastly all remaining dynamic objects are simulated to the end of this timestep and new timestep can be calculated.
+
+\subsubsection{Unit tests}
+Per requirement all collision detection algorithms in my project are covered by unit tests. They ensure that all of the collision results are correct. If I had more time I would implement unit tests for some critical methods in simulation.
+
+\section{Results}
+Result of this project is a simulator that has basic setup for collision detection implemented. I am able to set up several objects in my environment and simulate their movement with quite high accuracy. The biggest problem that I have encountered so far is un-handled singularities. Because of that spheres can phase through planes when their velocity is too low or they are moving almost parallel to the plane in time of collision. Despite that this simulator handles simulation of several concurrent collisions quite well.
+
+State changes were not implemented as I lacked time to do so. First week was spent on setting up the project in Windows environment, which quickly prompted me to switch over to Linux. Understanding Qt3D aspects was another roadblock that significantly slowed down my progress.
+
+As it is, this project is a great, but also a bit flawed foundation for further development. \Cref{BeforeAndAfter} shows simultaneous collision between three balls.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.75\textwidth]{BeforeAndAfter}
+  \caption{Before and after collision between three balls}\label{BeforeAndAfter}
+\end{figure}
+
+\section{Analysis \& Discussion}
+This project has been a great learning experience and although resulting program leaves much to be desired I am quite happy with progress I have made thanks to my colleagues.
+
+Analyzing resulting product I can clearly see that I need to handle state changes and some fringe edge cases, which my program does not do at the moment. After implementing those features I would need to work on rolling spheres as well as collision with cylinders and finite planes. Lastly I would like to implement my planned simulation, description of it that can be found in appendix.
+
+\section{Acknowledgments}
+I want to thank Christopher Hagerup for helping and guiding me while I worked on my simulator. He has helped me a lot during development so there's a lot of similarity in our projects and way of thinking. Kent Arne Larsen and Victor Lindb\"{a}ck have also helped me in my work.
+
+\section{Bibliography}
+\begingroup
+  \def\section*#1{}
+  \bibliographystyle{plain}
+  \bibliography{Bibliography}
+\endgroup
+
+\section{Appendix}
+\subsection{Setting up project}
+\subsubsection{Required packages}
+Project was set up on an Antergos machine. Since I was using Clang as a compiler I was forced to set up some ignore flags in CMakeLists.txt files for GMlib2, GMlib2qt and Template app. Therefore I recommend using my forked repositories. Following packages need to be compiled and installed with their dependencies so that this project is able to run.
+\begin{itemize}
+  \item Latest QtLibrary, at least version 5.6
+  \item Blaze
+  \item Clang, at least version 5.0
+  \item CMake, at least version 3.8
+  \item Ninja
+  \item Gtest
+  \item Google benchmark
+\end{itemize}
+
+\subsubsection{Building projects}
+GMlib2 needs to be built first, building can be done in Qt Creator or through terminal. CMake needs to be set up with following flag \verb|blaze_DIR| which points to cmake directory in blaze installation directory. \url{https://source.uit.no/mormonjesus69420/gmlib2-prototype}
+
+GMlib2Qt needs to be built after GMlib2 and point to its cmake directory in \verb|gmlib2_DIR| CMake variable. GMlib2 needs to be set as its dependency.  \url{https://source.uit.no/mormonjesus69420/gmlib2qt-prototype}
+
+Lastly STE6245TemplateApp is built. CMake will need \verb|gmlib2qt_DIR| variable to point to cmake directory in GMlib2Qt, as well as \verb|benchmark_DIR| to point to cmake directory in benchmark installation directory. GMlib2 and GMlib2Qt are its dependencies.  \url{https://source.uit.no/mormonjesus69420/pachinko-machine}
+
+\subsection{Task Description}
+My plan is to implement a working simulation of Japanese gambling game called Pachinko. This game resembles the western pinball machine. It sends several steel balls from the bottom of the playing field, which is usually circular in shape. Balls then travel along the track and upon reaching the top of the playing field they start to fall down, bouncing against each other and against the metal pins that stick from the board. Goal itself is to have as many balls as possible fall down into the designated small cups strewn across the board, several versions include flippers moving randomly making it harder to hit those cups. An example of such board is shown in \cref{OriginalPachinko}.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{PachinkoBoard}
+  \caption{An example of old fashioned Pachinko machine.} \label{OriginalPachinko}
+\end{figure}
+My plan is to simulate that game, though what I'm aiming for is a simplified version which will use a rectangular box with several rows of pins and some receiving boxes on the bottom. A mockup of the working game/simulation is shown in \cref{Pachinko}.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.4\textwidth]{Pachinko}
+  \caption{Mockup of the working game with some balls drawn in to show how the game itself starts.} \label{Pachinko}
+\end{figure}
+\end{document} 

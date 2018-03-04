@@ -47,14 +47,14 @@ void Simulator::simulate(seconds_type dt)
     collisions.pop_back();
 
     if (collision.colliding == CollidingWith::plane) {
-      auto& collidingSphere = dynamic_spheres.at(collision.id1);
-      auto& collidingPlane = static_planes.at(collision.id2);
+      auto& sphere = dynamic_spheres.at(collision.id1);
+      auto& plane = static_planes.at(collision.id2);
 
-      simulateUpToCollision(collidingSphere, collision, dt);
+      simulateUpToCollision(sphere, collision, dt);
 
-      impactResponse(collidingSphere, collidingPlane, dt);
+      impactResponse(sphere, plane, dt);
 
-      newCollisionCheck(collidingSphere, collision, dt);
+      newCollisionCheck(sphere, collision, dt);
     }
 
     else if (collision.colliding == CollidingWith::sphere) {
@@ -76,6 +76,17 @@ void Simulator::simulate(seconds_type dt)
     sphere_data.velocity = sphere_data.velocity + sphere_data.curr_acc * (dt - sphere_data.t_in_dt).count();
     aspect->objectControllerBackend(sphere_id)->updatePositions(sphere_data.position);
   }
+}
+
+void Simulator::initDynamicPhysObject(BackendData& data)
+{
+  data.t_in_dt = seconds_type(0);
+}
+
+void Simulator::calculateDs(SphereBackendData& data, const seconds_type dt)
+{
+  data.curr_acc = gravity_acc;
+  data.curr_ds = (data.velocity + 0.5 * data.curr_acc * dt.count()) * dt.count();
 }
 
 void Simulator::collisionCheck(const seconds_type dt)
@@ -219,16 +230,5 @@ void Simulator::newCollisionCheck(SphereBackendData& sphere, CollisionObject& co
   }
 
   sortAndMakeUnique();
-}
-
-void Simulator::calculateDs(SphereBackendData& data, const seconds_type dt)
-{
-  data.curr_acc = gravity_acc;
-  data.curr_ds = (data.velocity + 0.5 * data.curr_acc * dt.count()) * dt.count();
-}
-
-void Simulator::initDynamicPhysObject(BackendData& data)
-{
-  data.t_in_dt = seconds_type(0);
 }
 } // namespace simaspect
